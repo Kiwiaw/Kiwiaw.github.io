@@ -1,0 +1,330 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Kinga Kaczmarzyk</title>
+  <meta name="description" content="Kinga Kaczmarzyk, computer vision researcher: keypoints, feature matching and camera pose for GPS-denied navigation. ETH Zürich CVG, ESA ESTEC, TU Delft.">
+  <meta property="og:title" content="Kinga Kaczmarzyk · computer vision">
+  <meta property="og:type" content="website">
+  <meta property="og:description" content="Keypoints, matching and camera pose, mostly where GPS does not reach: drones, the Moon, other people's models.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Ccircle cx='20' cy='20' r='17' fill='%231f2547'/%3E%3Ccircle cx='13' cy='15' r='3' fill='%23ffd166'/%3E%3Ccircle cx='27' cy='13' r='3' fill='%23ffd166'/%3E%3Ccircle cx='20' cy='27' r='3' fill='%23ffd166'/%3E%3Cpath d='M13 15L27 13L20 27Z' fill='none' stroke='%233fe0b0' stroke-width='1.6'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css?v=34">
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+      }
+    }
+  </script>
+  <script type="module" src="main.js?v=26"></script>
+  <script type="module" src="artifacts.js?v=12"></script>
+  <script type="module" src="demos.js?v=30"></script>
+  <script type="module" src="forkpoint.js?v=33"></script>
+  <script type="module" src="tracker.js?v=25"></script>
+</head>
+<body>
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="site-header">
+    <a class="logo" href="#top" aria-label="Kinga Kaczmarzyk, back to top">
+      <svg viewBox="0 0 40 40" width="34" height="34" aria-hidden="true">
+        <circle cx="20" cy="20" r="17" fill="#1f2547"/>
+        <path d="M13 15L27 13L20 27Z" fill="none" stroke="#3fe0b0" stroke-width="1.6"/>
+        <circle cx="13" cy="15" r="3" fill="#ffd166"/><circle cx="27" cy="13" r="3" fill="#ffd166"/><circle cx="20" cy="27" r="3" fill="#ffd166"/>
+      </svg>
+    </a>
+    <nav class="site-nav" aria-label="Main">
+      <a href="#experience">Experience</a><span class="sep" aria-hidden="true">|</span><a href="#research">Research</a><span class="sep" aria-hidden="true">|</span><a href="#projects">Projects</a><span class="sep" aria-hidden="true">|</span><a href="#contact">Contact</a>
+    </nav>
+  </header>
+
+  <main id="top">
+    <section class="stage" id="stage" aria-label="Interactive 3D scene: Kinga at her desk, surrounded by the places she has worked">
+      <canvas id="scene" role="img" aria-label="Kinga typing at a laptop. Around the desk: snowy Alps with a CVG flag, a moon lander on a patch of lunar ground, and a drone filming a satellite map."></canvas>
+      <canvas id="kp" aria-hidden="true"></canvas>
+      <div id="spots" class="spots"></div>
+      <p id="bubble" class="bubble" role="status" hidden></p>
+
+      <nav class="views" aria-label="Tour of the scene">
+        <button id="tour" class="tour-btn" type="button" aria-pressed="false"><span class="tour-icon" aria-hidden="true"></span><span class="tour-text">Take the tour</span></button>
+        <button class="pill" type="button" data-view="desk" aria-pressed="false">Kinga</button>
+        <button class="pill" type="button" data-view="alps" aria-pressed="false">ETH Zürich</button>
+        <button class="pill" type="button" data-view="moon" aria-pressed="false">ESA</button>
+        <button class="pill" type="button" data-view="drone" aria-pressed="false">Scaled Autonomy</button>
+        <button class="pill is-active" type="button" data-view="overview" aria-pressed="true">Overview</button>
+      </nav>
+
+      <button id="vision" class="vision-btn" type="button" aria-pressed="false">
+        <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><circle cx="12" cy="12" r="3.2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        Keypoint view
+      </button>
+      <p id="kp-stat" class="kp-stat" aria-live="polite"></p>
+
+      <aside id="spot-card" class="spot-card" hidden>
+        <button class="spot-close" type="button" aria-label="Close">×</button>
+        <h3 class="spot-title"></h3>
+        <p class="spot-meta"></p>
+        <p class="spot-text"></p>
+        <a class="spot-more" href="#experience">Read more ↓</a>
+      </aside>
+
+      <div class="intro">
+        <h1 class="name">Kinga Kaczmarzyk</h1>
+        <p class="role">Computer vision researcher</p>
+        <p class="where">ETH Zürich CVG · ESA ESTEC · TU Delft</p>
+      </div>
+
+      <div class="loading" id="loading" role="status">Loading…</div>
+      <noscript><p class="nogl">The 3D scene needs JavaScript and WebGL. Everything else on this page works without it.</p></noscript>
+      <div class="hint" id="hint" aria-hidden="true">
+        <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M4 12h16M4 12l4-4M4 12l4 4M20 12l-4-4M20 12l-4 4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        drag to rotate · click the dots, or Kinga
+      </div>
+    </section>
+
+    <div class="content" id="content">
+      <section class="hero">
+        <p class="role">Keypoints, matching and camera pose</p>
+        <p class="lede">I work on how cameras find out where they are when GPS does not reach: drones over farmland, landers over the Moon, and learned keypoint detectors that should know when they are unsure. BSc Computer Science &amp; Engineering at TU Delft, research intern at ETH Zürich's Computer Vision and Geometry Group.</p>
+        <ul class="facts" aria-label="Highlights">
+          <li><strong>ETH Zürich &amp; ESA</strong> computer vision research internships during my BSc, plus drone navigation at Scaled Autonomy</li>
+          <li><strong>Built real systems</strong> <a href="#track">multi-camera 3D drone monitoring</a>: several cameras together find where a drone is in 3D</li>
+          <li><strong>TU Delft</strong> BSc Computer Science &amp; Engineering, 8.0 / 10 grade average</li>
+        </ul>
+        <div class="cta">
+          <a class="btn btn--solid" href="mailto:Kinga_Kaczmarzyk@outlook.com">Email me</a>
+          <a class="btn" href="https://github.com/Kiwiaw" target="_blank" rel="noopener">GitHub</a>
+          <a class="btn" href="https://www.linkedin.com/in/kinga-kaczmarzyk/" target="_blank" rel="noopener">LinkedIn</a>
+          <!-- TODO: add cv.pdf next to index.html, then uncomment:
+          <a class="btn" href="cv.pdf" target="_blank" rel="noopener">CV (PDF)</a> -->
+        </div>
+      </section>
+
+      <section id="experience" class="block">
+        <h2>Experience</h2>
+        <ol class="timeline">
+          <li class="job">
+            <div class="job-when">Jul 2026 – now</div>
+            <div class="job-body">
+              <h3>Research intern · <span>ETH Zürich, Computer Vision and Geometry Group</span></h3>
+              <p>Prof. Marc Pollefeys' group, supervised by Philipp Lindenberger. Keypoint detection and uncertainty for more reliable camera pose: a new training objective for a learned detector, building on <strong>RaCo</strong> (3DV 2026), the group's earlier detector. Evaluated on HPatches, MegaDepth, ScanNet and ETH3D on the Euler cluster. Preprint in preparation.</p>
+              <ul class="tags"><li>PyTorch</li><li>keypoint detection</li><li>pose estimation</li><li>Slurm / HPC</li></ul>
+            </div>
+          </li>
+          <li class="job">
+            <div class="job-when">Apr – Jun 2026</div>
+            <div class="job-body">
+              <h3>ESA ESTEC · <span>Guidance, Navigation and Control section</span></h3>
+              <p>Cross-modal feature matching from an <strong>event camera</strong> to optical imagery, for terrain-relative navigation in lunar landings. Test scenarios built in the PANGU planetary simulator.</p>
+              <ul class="tags"><li>event cameras</li><li>cross-modal matching</li><li>PANGU</li></ul>
+            </div>
+          </li>
+          <li class="job">
+            <div class="job-when">Dec 2025 – Jun 2026</div>
+            <div class="job-body">
+              <h3>Computer vision engineer · <span>Scaled Autonomy</span></h3>
+              <p>Drone-to-satellite image registration for GPS-denied flight. <strong>LoFTR plus Fourier-Mellin</strong> matching reached <strong>four times the baseline inlier ratio</strong> on real flight data.</p>
+              <ul class="tags"><li>LoFTR</li><li>Fourier-Mellin</li><li>image registration</li></ul>
+            </div>
+          </li>
+          <li class="job">
+            <div class="job-when">expected 2027</div>
+            <div class="job-body">
+              <h3>BSc Computer Science &amp; Engineering · <span>TU Delft</span></h3>
+              <p>Multimedia variant, computer vision and ML track, GPA 8.0. Real-time multi-camera 3D drone tracking; part-time ML engineer at Dream Team Epoch; former board member of the debating club.</p>
+            </div>
+          </li>
+        </ol>
+      </section>
+
+      <section id="research" class="block">
+        <h2>Research</h2>
+        <article class="pub">
+          <div class="pub-thumb pub-thumb--kp" aria-hidden="true"><span>RaCo +</span></div>
+          <div class="pub-body">
+            <h3 class="pub-title">Keypoint uncertainty for more reliable camera pose</h3>
+            <p class="pub-authors"><strong>Kinga Kaczmarzyk</strong> · supervised by Philipp Lindenberger, group of Marc Pollefeys</p>
+            <p class="pub-venue"><em>Preprint in preparation · ETH Zürich CVG</em></p>
+            <p class="pub-note">A new training objective for a learned keypoint detector, so that it also predicts how far to trust each point. Builds on the group's RaCo (3DV 2026).</p>
+          </div>
+        </article>
+        <article class="pub">
+          <div class="pub-thumb pub-thumb--moon" aria-hidden="true"><span>EVENT ↔ RGB</span></div>
+          <div class="pub-body">
+            <h3 class="pub-title">Event-to-optical feature matching for lunar terrain-relative navigation</h3>
+            <p class="pub-authors"><strong>Kinga Kaczmarzyk</strong></p>
+            <p class="pub-venue"><em>ESA ESTEC work, write-up in progress</em></p>
+            <p class="pub-note">Matching what an event camera sees during descent to an optical map of the surface, tested in PANGU scenarios.</p>
+          </div>
+        </article>
+      </section>
+
+      <section id="projects" class="block">
+        <h2>Projects</h2>
+        <p class="section-lede">Things I built to understand a method properly. Each has a playable version that runs in your browser, on the real method at a small scale.</p>
+
+        <article class="project project--wide" id="track">
+          <div class="project-head">
+            <h3>Multi-camera drone tracking</h3>
+            <span class="project-link is-private">TU Delft project</span>
+          </div>
+          <ul class="tags tags--head"><li>multi-view geometry</li><li>triangulation</li><li>real-time</li></ul>
+          <p class="pitch"><strong>Problem:</strong> to monitor a drone, you need to know where it is in 3D, many times per second. One camera cannot do this: it sees the direction to the drone but not how far away it is.</p>
+          <p class="pitch"><strong>What I built:</strong> a tracker that uses several calibrated cameras. Each camera finds the drone in its image, and the lines of sight from all cameras are intersected to get one 3D position per frame. With three or more cameras, one can be blocked and the tracking keeps working.</p>
+          <p class="pitch"><strong>Try it:</strong> go through steps 1 to 4. Drag the room to look around. The bottom row shows what each camera sees.</p>
+          <div class="mc-steps" role="group" aria-label="Steps">
+            <button type="button" class="mc-step" data-step="0">1 · One camera</button>
+            <button type="button" class="mc-step" data-step="1">2 · Two cameras</button>
+            <button type="button" class="mc-step" data-step="2">3 · Three cameras</button>
+            <button type="button" class="mc-step" data-step="3">4 · Something in the way</button>
+          </div>
+          <div class="mc">
+            <div class="mc-stack">
+              <canvas class="mc-canvas" aria-label="3D room with three cameras, their sight lines and the drone; below, the three camera images"></canvas>
+              <canvas class="mc-overlay" width="960" height="620" aria-hidden="true"></canvas>
+            </div>
+            <p class="mc-caption" aria-live="polite"></p>
+            <label class="mc-noise-label">Detection noise in each image
+              <input type="range" class="mc-noise" min="0" max="8" step="0.5" value="2"></label>
+          </div>
+          <p class="notice">What to notice: one camera gives no position at all; two give one; a third lowers the average error shown in the corner; and the pillar only stops tracking when fewer than two cameras still see the drone.</p>
+        </article>
+        <article class="project project--wide" id="fork">
+          <div class="project-head">
+            <h3>forkpoint: visual model surgery</h3>
+            <a class="project-link" href="https://github.com/Kiwiaw/model_surgery" target="_blank" rel="noopener">Code ↗</a>
+          </div>
+          <ul class="tags tags--head"><li>PyTorch</li><li>FastAPI</li><li>React</li><li>TypeScript</li><li>pruning</li></ul>
+          <p class="pitch"><strong>Problem:</strong> to run an AI model on a phone or a drone, you usually have to make it smaller, which means deciding which parts to remove. But a model is millions of numbers hidden in code. You cannot see where its size is, which parts matter, or what an edit changed. So people guess, edit code, rerun scripts and compare printed numbers.</p>
+          <p class="pitch"><strong>What I built:</strong> forkpoint, which turns this into something you can see and click. It draws a PyTorch model as blocks sized by their number of weights, so you see at a glance where the bulk is. You cut blocks or weights in a copy of the model (a "fork"), then run the original and the fork side by side on the same image to see which answers changed and where in the network the change started. With the model in front of you, the trade-offs become obvious: the biggest blocks are not always the ones that matter most.</p>
+          <div class="fp3">
+            <p class="fp3-intro"><strong>Try it</strong> on a real image classifier, ResNet18, which was trained on 1000 kinds of objects and recognises all 7 of these cats. Shrink your fork with the slider, or click a block to remove it, and watch which photos stop being cats.</p>
+            <div class="fp3-controls">
+              <label class="fp3-slider"><span>1 · Shrink your fork: remove the <strong class="fp3-prune-out">0%</strong> smallest weights</span>
+                <input type="range" class="fp3-prune" min="0" max="90" step="10" value="0"></label>
+              <div class="fp3-scorebox" aria-live="polite">
+                <span class="fp3-k">Cats recognised</span><strong class="fp3-score">–</strong>
+                <span class="fp3-k">Weights kept</span><strong><span class="fp3-size">–</span> <small>of <span class="fp3-size0">–</span></small></strong>
+              </div>
+            </div>
+            <div class="fp3-modelbox">
+              <span class="fp3-step">2 · Or remove a whole block. This is the model: the photo goes in on the left and the answer comes out on the right. A bigger box has more weights.</span>
+              <div class="fp3-model" role="group" aria-label="The model's pieces"></div>
+            </div>
+            <p class="fp3-say" aria-live="polite">Loading the model…</p>
+            <div class="fp3-photos"></div>
+            <button type="button" class="btn fp3-reset">Reset fork</button>
+          </div>
+          <p class="notice">What to notice: half of the weights can go with no change at all. Some blocks can be removed and a few cats survive, because each block has a shortcut around it. Others, like the blocks that shrink the image, cannot be removed. All results come from the real model, run in PyTorch.</p>
+        </article>
+        <article class="project project--wide" id="lpr">
+          <div class="project-head">
+            <h3>License plate recognition</h3>
+            <a class="project-link" href="https://github.com/Kiwiaw/projIP" target="_blank" rel="noopener">Code ↗</a>
+          </div>
+          <ul class="tags tags--head"><li>Python</li><li>OpenCV</li><li>SVM</li><li>CI</li><li>team lead</li></ul>
+          <p class="pitch"><strong>Problem:</strong> read a car's licence plate from a car park camera, for example to open a gate or charge for parking, without any person checking it.</p>
+          <p class="pitch"><strong>What I built:</strong> a TU Delft image processing project; I led the team. Our program finds the yellow Dutch plate in each video frame, cuts it into single characters, and recognises each character by comparing it with stored examples of every letter and digit (the course version also used an SVM classifier).</p>
+          <p class="pitch"><strong>Try it:</strong> the program runs in your browser on real frames from the course video, with our character examples. Pick a frame and press <em>Read the plates</em>. Change the light and see where it breaks.</p>
+          <div class="lpr-thumbs" role="group" aria-label="Video frames"></div>
+          <div class="lpr">
+            <canvas class="lpr-canvas" width="640" height="480" aria-label="Video frame with the detected plates marked"></canvas>
+            <div class="lpr-panel">
+              <button type="button" class="btn btn--solid lpr-run">Read the plates</button>
+              <ol class="lpr-steps">
+                <li>Find yellow, plate-shaped regions</li>
+                <li>Split each plate into characters</li>
+                <li>Match characters to templates (a group between dashes is all letters or all digits)</li>
+              </ol>
+              <label>Light <output class="lpr-light-out">100%</output>
+                <input type="range" class="lpr-light" min="50" max="200" step="10" value="100"></label>
+              <p class="lpr-result" aria-live="polite"></p>
+            </div>
+          </div>
+          <div class="lpr-plates"></div>
+          <p class="notice">What to notice: the close-up plates are read correctly. In the frame with two small plates, each character is only a few pixels tall: on one plate step 2 finds just one character, and on the other step 3 gets 7 of the 8 right. Below about 60% light, step 1 fails first, because the plate no longer looks yellow.</p>
+        </article>
+        <article class="project project--wide" id="arc">
+          <div class="project-head">
+            <h3>ARC-AGI with a GPT-2 trained from scratch</h3>
+            <a class="project-link" href="https://github.com/Kiwiaw/arcAgi" target="_blank" rel="noopener">Code ↗</a>
+          </div>
+          <ul class="tags tags--head"><li>Python</li><li>PyTorch</li><li>GPT-2</li><li>data augmentation</li></ul>
+          <p class="pitch"><strong>Problem:</strong> ARC-AGI is a test of small colour-grid puzzles that people find easy and AI finds hard. Each puzzle has a new rule, and you must find it from two or three examples.</p>
+          <p class="pitch"><strong>What I built:</strong> a GPT-2 style language model, trained from scratch to solve these puzzles. Each grid is written as text with 14 symbols. To get more training data, every puzzle is also rotated, mirrored and recoloured. The model learns the patterns well but often gets the size of the answer grid wrong.</p>
+          <p class="pitch"><strong>Try it:</strong> find the rule from the two examples, then paint your answer and press <em>Check</em>. The answer does not have to be the same size as the input.</p>
+          <div class="arc" data-arc>
+            <div class="arc-examples"></div>
+            <div class="arc-play">
+              <div class="arc-test"></div>
+              <div class="arc-answer">
+                <div class="arc-grid arc-grid--edit" role="grid" aria-label="Your answer"></div>
+                <div class="arc-tools">
+                  <div class="arc-palette" role="radiogroup" aria-label="Colour"></div>
+                  <div class="arc-size">
+                    <button type="button" data-size="w-">− width</button><button type="button" data-size="w+">+ width</button>
+                    <button type="button" data-size="h-">− height</button><button type="button" data-size="h+">+ height</button>
+                  </div>
+                  <button type="button" class="btn btn--solid arc-check">Check</button>
+                  <p class="arc-result" aria-live="polite"></p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <p class="notice">What to notice: the colours are easy, the output size is the trap. That is where my model fails most.</p>
+        </article>
+        <article class="project project--wide" id="dlt">
+          <div class="project-head">
+            <h3>Camera calibration from scratch (DLT + Hartley normalisation)</h3>
+            <a class="project-link" href="https://github.com/Kiwiaw/dlt_with_optimisation" target="_blank" rel="noopener">Code ↗</a>
+          </div>
+          <ul class="tags tags--head"><li>Python</li><li>NumPy</li><li>camera calibration</li><li>optimisation</li></ul>
+          <p class="pitch"><strong>Problem:</strong> to measure anything with a camera, such as a distance, a 3D shape or a robot's position, you must know exactly how that camera turns 3D points into pixels: its focal length, position and direction. Finding these numbers is called camera calibration.</p>
+          <p class="pitch"><strong>What I built:</strong> calibration from scratch in plain NumPy. The Direct Linear Transform (DLT) computes the camera from known 3D points and the pixels where they appear. Hartley normalisation rescales the numbers first so the computation stays accurate, and a final optimisation step refines the result.</p>
+          <p class="pitch"><strong>Try it:</strong> a camera looks at a calibration object, and the measured points get pixel noise. Drag the image to move the camera, add noise, and switch normalisation off. Without it, the equations become about 10⁸ times more sensitive to errors (their condition number grows).</p>
+          <div class="dlt">
+            <canvas class="dlt-canvas" width="640" height="400" aria-label="Projected calibration points: true positions, noisy observations and reprojections"></canvas>
+            <div class="dlt-panel">
+              <label>Pixel noise <output class="dlt-noise-out">1.0 px</output>
+                <input type="range" class="dlt-noise" min="0" max="5" step="0.1" value="1"></label>
+              <label class="dlt-check"><input type="checkbox" class="dlt-norm" checked> Hartley normalisation</label>
+              <button type="button" class="btn dlt-resample">New noise</button>
+              <dl class="dlt-stats">
+                <dt>Reprojection error (RMS)</dt><dd class="dlt-err">–</dd>
+                <dt>Conditioning of AᵀA (λ₁₂ / λ₂)</dt><dd class="dlt-cond">–</dd>
+                <dt>Focal length (true 800 px)</dt><dd class="dlt-f">–</dd>
+              </dl>
+              <p class="dlt-legend"><span class="lg lg-true"></span>true <span class="lg lg-obs"></span>observed <span class="lg lg-rep"></span>reprojected</p>
+            </div>
+          </div>
+          <p class="notice">What to notice: noise grows the pink error lines, while normalisation changes the conditioning far more than the error.</p>
+        </article>
+
+        <p class="also"><strong>Also built:</strong> <a href="https://github.com/Kiwiaw/FridgeApp" target="_blank" rel="noopener">FridgeApp</a>, a full-stack React Native, Node.js and MongoDB app for tracking what is in the fridge.</p>
+      </section>
+
+      <section id="about" class="block">
+        <h2>About</h2>
+        <p>I left school early to teach myself maths and computer science, and got into TU Delft through an independent entrance exam. Since then I have tried to understand every method I use from first principles: I keep a daily journal that walks from Euclid's <em>Elements</em> up to the geometry of computer vision.</p>
+        <p>Outside research: debating, and tea, which is always on.</p>
+      </section>
+
+      <section id="contact" class="block">
+        <h2>Contact</h2>
+        <p>Open to conversations about research internships, research engineering and computer vision collaborations.</p>
+        <ul class="contact-list">
+          <li><span class="label">GitHub</span><a href="https://github.com/Kiwiaw" target="_blank" rel="noopener">github.com/Kiwiaw</a></li>
+          <li><span class="label">Email</span><a href="mailto:Kinga_Kaczmarzyk@outlook.com">Kinga_Kaczmarzyk@outlook.com</a></li>
+          <li><span class="label">LinkedIn</span><a href="https://www.linkedin.com/in/kinga-kaczmarzyk/" target="_blank" rel="noopener">linkedin.com/in/kinga-kaczmarzyk</a></li>
+        </ul>
+      </section>
+    </div>
+  </main>
+
+  <footer class="site-footer">© 2026 Kinga Kaczmarzyk · the figure is a Blender model of me, the scene is three.js</footer>
+</body>
+</html>
