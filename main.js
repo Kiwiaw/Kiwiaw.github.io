@@ -767,7 +767,7 @@ function stopTour() {
   tourBtn.querySelector('.tour-text').textContent = 'Take the tour';
   scheduleResume();
 }
-tourBtn.addEventListener('click', () => {
+tourBtn?.addEventListener('click', () => {
   if (tourTimer) return stopTour();
   let i = 0;
   visit(TOUR[i]);
